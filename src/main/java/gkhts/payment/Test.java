@@ -1,6 +1,7 @@
 package gkhts.payment;
 
 import gkhts.payment.enums.ChargeTypeEnum;
+import gkhts.payment.enums.CurrencyEnum;
 import gkhts.payment.enums.PaymentProviderTypeEnum;
 import gkhts.payment.exceptions.ConfigurationException;
 import gkhts.payment.exceptions.PaymentTransactionException;
@@ -21,6 +22,11 @@ public class Test {
 			nestpayProvider.setUsername(name);
 			nestpayProvider.setPassword(password);
 			nestpayProvider.setType(ChargeTypeEnum.AUTH);
+			nestpayProvider.setCurrency(CurrencyEnum.TL);
+			nestpayProvider.setTotal("price");
+			nestpayProvider.setCvv2("cvv or cvv2");
+			nestpayProvider.setExpires("expire time mm/yy");
+			nestpayProvider.setNumber("credit card number");
 			PaymentResult paymentResult = nestpayProvider.processTransaction();
 			String orderId = paymentResult.getOrderId();
 			System.out.println(orderId);
