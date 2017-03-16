@@ -14,12 +14,17 @@ mvn install:install-file  -DgroupId=com.est.nestpay -DartifactId=jpay -Dpackagin
 			nestpayProvider.setUsername(name);
 			nestpayProvider.setPassword(password);
 			nestpayProvider.setType(ChargeTypeEnum.AUTH);
+			nestpayProvider.setCurrency(CurrencyEnum.TL);
+			nestpayProvider.setTotal("price");
+			nestpayProvider.setCvv2("cvv or cvv2");
+			nestpayProvider.setExpires("expire time mm/yy");
+			nestpayProvider.setNumber("credit card number");
 			PaymentResult paymentResult = nestpayProvider.processTransaction();
 			String orderId = paymentResult.getOrderId();
 			System.out.println(orderId);
 			
 			
-		} catch (PaymentTransactionException e) {<br />
+		} catch (PaymentTransactionException e) {
 			System.out.println(e.getResult().getErrMsg());
 			System.out.println(e.getResult().getResponse());
 			e.printStackTrace();
@@ -29,3 +34,4 @@ mvn install:install-file  -DgroupId=com.est.nestpay -DartifactId=jpay -Dpackagin
 			e.printStackTrace();
 			
 		}
+
