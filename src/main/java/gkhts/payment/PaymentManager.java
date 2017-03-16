@@ -2,71 +2,197 @@ package gkhts.payment;
 
 import gkhts.payment.enums.ChargeTypeEnum;
 import gkhts.payment.enums.CurrencyEnum;
-import gkhts.payment.enums.PaymentProviderTypeEnum;
 import gkhts.payment.exceptions.ConfigurationException;
 import gkhts.payment.exceptions.PaymentTransactionException;
 import gkhts.payment.model.PaymentResult;
-import gkhts.payment.model.ProviderConnectionConfigurer;
+import gkhts.payment.utils.StringUtils;
 
-public class Test {
+import com.est.jpay;
 
-	private String name;
-	private String password;
-	private String clientId;
+public class PaymentManager implements PaymentProvider {
 
-	public void testPayment() {
+	public static PaymentManager instance = null;
 
-		try {
-			PaymentProvider nestpayProvider = PaymentProviderFactory.getPaymentProvider(PaymentProviderTypeEnum.EST, new ProviderConnectionConfigurer("entegrasyon.asseco-see.com.tr", 443, "/fim/api"));
-			nestpayProvider.setClientId(clientId);
-			nestpayProvider.setUsername(name);
-			nestpayProvider.setPassword(password);
-			nestpayProvider.setType(ChargeTypeEnum.AUTH);
-			nestpayProvider.setCurrency(CurrencyEnum.TL);
-			nestpayProvider.setTotal("price");
-			nestpayProvider.setCvv2("cvv or cvv2");
-			nestpayProvider.setExpires("expire time mm/yy");
-			nestpayProvider.setNumber("credit card number");
-			PaymentResult paymentResult = nestpayProvider.processTransaction();
-			String orderId = paymentResult.getOrderId();
-			System.out.println(orderId);
-			
-			
-		} catch (PaymentTransactionException e) {
-			System.out.println(e.getResult().getErrMsg());
-			System.out.println(e.getResult().getResponse());
-			e.printStackTrace();
-			
-		} catch (ConfigurationException e) {
-			
-			e.printStackTrace();
-			
+	String host;
+	Integer port;
+	String path;
+	String username;
+	String password;
+	String clientId;
+	ChargeTypeEnum type;
+	String creditCardNumber;
+	String expires;
+	String total;
+	String cvv2;
+	CurrencyEnum currencyEnum;
+
+	protected PaymentManager() {
+
+	}
+
+	private PaymentManager(String host, Integer port, String path) {
+		this.host = host;
+		this.port = port;
+		this.path = path;
+
+	}
+
+	public static PaymentManager getInstance(String host, Integer port, String path) {
+		if (instance == null) {
+			synchronized (PaymentManager.class) {
+				if (instance == null) {
+					instance = new PaymentManager(host, port, path);
+				}
+			}
 		}
-
+		return instance;
 	}
 
-	public String getName() {
-		return name;
+	@Override
+	public String getUsername() {
+		return username;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	@Override
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
+	@Override
 	public String getPassword() {
 		return password;
 	}
 
+	@Override
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	@Override
 	public String getClientId() {
 		return clientId;
 	}
 
+	@Override
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+
+	@Override
+	public ChargeTypeEnum getType() {
+		return type;
+	}
+
+	@Override
+	public void setType(ChargeTypeEnum type) {
+		this.type = type;
+	}
+
+	@Override
+	public PaymentResult processTransaction() throws PaymentTransactionException,ConfigurationException {
+		PaymentResult paymentResult = new PaymentResult();
+
+		if (StringUtils.isNullOrEmpty(clientId)) {
+			throw new ConfigurationException("ClientId can not be null");
+		} else if (StringUtils.isNullOrEmpty(port)) {
+			throw new ConfigurationException("Port can not be null");
+		} else if (StringUtils.isNullOrEmpty(path)) {
+			throw new ConfigurationException("Path can not be null");
+		} else if (StringUtils.isNullOrEmpty(username)) {
+			throw new ConfigurationException("User name can not be null");
+		} else if (StringUtils.isNullOrEmpty(password)) {
+			throw new ConfigurationException("Password name can not be null");
+		} else if (StringUtils.isNullOrEmpty(type.getName())) {
+			throw new ConfigurationException("ChargeType name can not be null");
+		}
+
+		jpay jpy = new jpay();
+		jpy.setName(username);
+		jpy.setPassword(password);
+		jpy.setClientId(clientId);
+		jpy.setType(type.getName());
+		jpy.setCurrency(currencyEnum.getName());
+		jpy.setTotal(total);
+		jpy.setCvv2Val(cvv2);
+		jpy.setNumber(creditCardNumber);
+		jpy.setExpires(expires);
+		if (jpy.processTransaction(clientId, port, path) > 0) {
+
+			paymentResult.setOrderId(jpy.getOrderId());
+			paymentResult.setGroupId(jpy.getGroupId());
+			paymentResult.setResponse(jpy.getResponse());
+			paymentResult.setAuthCode(jpy.getAuthCode());
+			paymentResult.setHostRefNum(jpy.getHostRefNum());
+			paymentResult.setProcReturnCode(jpy.getProcReturnCode());
+			paymentResult.setTransId(jpy.getTransId());
+			paymentResult.setErrMsg(jpy.getErrMsg());
+
+		} else {
+
+			paymentResult.setOrderId(jpy.getOrderId());
+			paymentResult.setGroupId(jpy.getGroupId());
+			paymentResult.setResponse(jpy.getResponse());
+			paymentResult.setAuthCode(jpy.getAuthCode());
+			paymentResult.setHostRefNum(jpy.getHostRefNum());
+			paymentResult.setProcReturnCode(jpy.getProcReturnCode());
+			paymentResult.setTransId(jpy.getTransId());
+			paymentResult.setErrMsg(jpy.getErrMsg());
+
+			throw new PaymentTransactionException("Transaction Aborted.For detail see paymentresult object", paymentResult);
+
+		}
+		return paymentResult;
+	}
+
+	@Override
+	public void setNumber(String creditCardNumber) {
+		this.creditCardNumber = creditCardNumber;
+	}
+
+	@Override
+	public String getNumber() {
+		return this.creditCardNumber;
+	}
+
+	@Override
+	public String getCvv2() {
+		return this.cvv2;
+	}
+
+	@Override
+	public void setCvv2(String cvv2) {
+		this.cvv2 = cvv2;
+	}
+
+	@Override
+	public String getExpires() {
+		
+		return this.expires;
+	}
+
+	@Override
+	public void setExpires(String value) {
+		this.expires = value;
+	}
+
+	@Override
+	public String getTotal() {
+		return this.total;
+	}
+
+	@Override
+	public void setTotal(String total) {
+		this.total = total;
+	}
+
+	@Override
+	public CurrencyEnum getCurrency() {
+		return this.currencyEnum;
+	}
+
+	@Override
+	public void setCurrency(CurrencyEnum currencyEnum) {
+		this.currencyEnum = currencyEnum;
 	}
 
 }
