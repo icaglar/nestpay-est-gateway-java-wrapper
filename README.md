@@ -3,24 +3,24 @@ NestPay (EST) payment processing java wrapper
 
 <br />
 		
-		try { <br />
-			PaymentProvider nestpayProvider = PaymentProviderFactory.getPaymentProvider(PaymentProviderTypeEnum.EST, new ProviderConnectionConfigurer("entegrasyon.asseco-see.com.tr", 443, "/fim/api"));<br />
-			nestpayProvider.setClientId(clientId);<br />
-			nestpayProvider.setUsername(name);<br />
-			nestpayProvider.setPassword(password);<br />
-			nestpayProvider.setType(ChargeTypeEnum.AUTH);<br />
-			PaymentResult paymentResult = nestpayProvider.processTransaction();<br />
-			String orderId = paymentResult.getOrderId();<br />
-			System.out.println(orderId);<br />
+		try {
+			PaymentProvider nestpayProvider = PaymentProviderFactory.getPaymentProvider(PaymentProviderTypeEnum.EST, new ProviderConnectionConfigurer("entegrasyon.asseco-see.com.tr", 443, "/fim/api"));
+			nestpayProvider.setClientId(clientId);
+			nestpayProvider.setUsername(name);
+			nestpayProvider.setPassword(password);
+			nestpayProvider.setType(ChargeTypeEnum.AUTH);
+			PaymentResult paymentResult = nestpayProvider.processTransaction();
+			String orderId = paymentResult.getOrderId();
+			System.out.println(orderId);
 			
 			
 		} catch (PaymentTransactionException e) {<br />
-			System.out.println(e.getResult().getErrMsg());<br />
-			System.out.println(e.getResult().getResponse());<br />
-			e.printStackTrace();<br />
+			System.out.println(e.getResult().getErrMsg());
+			System.out.println(e.getResult().getResponse());
+			e.printStackTrace();
 			
-		} catch (ConfigurationException e) {<br />
+		} catch (ConfigurationException e) {
 			
-			e.printStackTrace();<br />
+			e.printStackTrace();
 			
-		}<br />
+		}
