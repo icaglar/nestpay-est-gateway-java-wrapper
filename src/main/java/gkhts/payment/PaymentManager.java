@@ -36,7 +36,16 @@ public class PaymentManager implements PaymentProvider {
 		this.path = path;
 
 	}
-
+	public static PaymentManager getInstance() {
+		if (instance == null) {
+			synchronized (PaymentManager.class) {
+				if (instance == null) {
+					instance = new PaymentManager();
+				}
+			}
+		}
+		return instance;
+	}
 	public static PaymentManager getInstance(String host, Integer port, String path) {
 		if (instance == null) {
 			synchronized (PaymentManager.class) {
